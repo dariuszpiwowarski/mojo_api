@@ -1,0 +1,32 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+use Mojo::File 'curfile';
+use lib curfile->dirname->sibling('lib')->to_string;
+use Mojolicious::Commands;
+use Mojo::Promise;
+use Mojo::UserAgent;
+
+# Wrap continuation-passing style APIs with promises
+my $ua = Mojo::UserAgent->new;
+sub getPromise {
+  my $promise = Mojo::Promise->new;
+  $ua->get(@_ => sub {
+    my ($ua, $tx) = @_;
+    my $err = $tx->error;
+    if   (!$err || $err->{code}) { $promise->resolve($tx) }
+    else                         { $promise->reject($err->{message}) }
+  });
+  return $promise;
+}
+
+# Perform non-blocking operations sequentially
+getPromise('http://127.0.0.1:5000')->then(sub {
+  my $mojo = shift;
+  print $mojo->res->json;
+})->catch(sub {
+  my $err = shift;
+  warn "Something went wrong: $err";
+})->wait;
