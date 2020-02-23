@@ -15,14 +15,7 @@ sub new {
 
 sub getInfo {
   my $self = shift;
-  my $promise = Mojo::Promise->new;
-  $ua->get($self->{address} => sub {
-      my ($ua, $tx) = @_;
-      my $err = $tx->error;
-      if   (!$err || $err->{code}) { $promise->resolve($tx) }
-      else                         { $promise->reject($err->{message}) }
-    });
-  return $promise;
+  return $ua->get_p($self->{address});
 }
 
 1;

@@ -49,7 +49,7 @@ sub _check_auth {
   my $self = shift;
 
   my $auth_header = $self->req->headers->authorization;
-  if ($auth_header =~ /Bearer\ (.*)$/){
+  if ($auth_header && $auth_header =~ /Bearer\ (.*)$/){
     my $bearer_token = $1;
     if (my $user = $self->users->find_by_token($bearer_token)) {
       $self->_log('User ' . $user->{email} . ' authenticated');
